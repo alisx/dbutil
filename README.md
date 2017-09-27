@@ -22,38 +22,38 @@ print('ret:',ret)
 + 库表必须有且有唯一的自增长主键
 
 ### 方法 ###
-+ ```DBConn```<br>
++ **```DBConn```**<br>
   创建一个数据库工具实例<br>
   必须提供参数 ```host```，```user```，```passwd```<br>
   可选参数 ``database``，不提供，需要在语句中指定数据库<br>
           ``charset`` 默认 ``utf8``<br>
           ``use_unicode`` 默认``True``<br>
-+ qj
++ **``qj``**
   执行一个查询语句，query json 的简写<br>
   参数：``sql``<br>
   返回：查询结果``list``<br>
   
-+ qvs
++ **``qvs``**
   执行一个查询语句 query values 的简写<br>
   参数：``sql``<br>
   返回：查询结果集的第一列组成的``list``<br>
   
-+ qv
++ **``qv``**
   执行一个查询语句 query value 的简写<br>
   参数：``sql``<br>
   返回：查询结果集的第一行第一列的值<br>
   
-+ qo
++ **``qo``**
   执行一个查询语句 query object 的简写<br>
   参数：``sql``<br>
   返回：查询结果集的第一行的``dict``<br>
   
-+ de
++ **``de``**
   执行一个sql语句 do execute 的简写<br>
   参数：``sql``<br>
   返回：影响行数<br>
   
-+ insert
++ **``insert``**
   向库表中插入多行记录<br>
   参数：``table_name`` 库表名称<br>
         ``rows`` 需要插入的记录，``list``类型<br>
@@ -63,7 +63,7 @@ print('ret:',ret)
     2. 每行记录的字段可以不一致
     3. 记录中不属于库表的字段会被忽略
  
-+ update
++ **``update``**
   更新库表中的多行记录
   参数：``table_name`` 库表名称<br>
         ``rows`` 需要更新的记录，``list``类型<br>
