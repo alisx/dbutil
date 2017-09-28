@@ -33,6 +33,7 @@ class DBConn(object):
             )
         except pymysql.Error as e:
             print('链接数据库出错:', e)
+            raise
         return conn
         pass
 
@@ -99,7 +100,7 @@ class DBConn(object):
         all_fields = self.__get_table_fields(table_name)
         insert_sqls = []
         insert_fields = all_fields.get('fields')
-        insert_sql = "insert into %s (%s) " % (table_name, ','.join(insert_fields))
+        insert_sql = "insert into %s (%s) " % (table_name, '`'+'`,`'.join(insert_fields)+'`')
         insert_sql += "values(" + ','.join(['%s'] * len(insert_fields)) + ")"
 
         values = []
@@ -127,6 +128,7 @@ class DBConn(object):
             conn.commit()
         except pymysql.Error as e:
             conn.rollback()
+            raise
         finally:
             conn.close()
         return rows
@@ -149,25 +151,32 @@ class DBConn(object):
                 else:
                     # insert
                     insert_rows.append(row)
+        try:
+            if conn is None:
+                conn = self.__get_conn()
+            cursor = conn.cursor(pymysql.cursors.DictCursor)
+            for row in update_rows:
+                for f in all_fields.get('fields'):
+                    if f in all_fields.get('primary_keys'):  # 主键不参与更新
+                        continue
+                    val = row.get(f, None)
+                    if val:  # 有值
+                        placeholder = "{}=".format(f) + "%({})s".format(f)
+                        key_list.extend([placeholder])
+                if len(key_list) > 0:
+                    val_list = ",".join(key_list)
+                    sql = "UPDATE `{table}` SET {values} WHERE `{idDirectConnect_ID}`= %({idDirectConnect_ID})s;" \
+                        .format(table=table_name, values=val_list, idDirectConnect_ID=all_fields.get('primary_keys')[0])
+                    cursor.execute(sql, row)
+            insert_rows = self.insert(table_name, insert_rows, conn)
 
-        if conn is None:
-            conn = self.__get_conn()
-        cursor = conn.cursor(pymysql.cursors.DictCursor)
-        for row in update_rows:
-            for f in all_fields.get('fields'):
-                if f in all_fields.get('primary_keys'):  # 主键不参与更新
-                    continue
-                val = row.get(f, None)
-                if val:  # 有值
-                    placeholder = "{}=".format(f) + "%({})s".format(f)
-                    key_list.extend([placeholder])
-            if len(key_list) > 0:
-                val_list = ",".join(key_list)
-                sql = "UPDATE `{table}` SET {values} WHERE `{idDirectConnect_ID}`= %({idDirectConnect_ID})s;" \
-                    .format(table=table_name, values=val_list, idDirectConnect_ID=all_fields.get('primary_keys')[0])
-                cursor.execute(sql, row)
-        insert_rows = self.insert(table_name, insert_rows, conn)
-        update_rows.extend(insert_rows)
-        conn.commit()
+            update_rows.extend(insert_rows)
+            conn.commit()
+        except pymysql.Error e:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+            
         return update_rows
         pass
