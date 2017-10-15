@@ -172,7 +172,7 @@ class DBConn(object):
 
             update_rows.extend(insert_rows)
             conn.commit()
-        except pymysql.Error e:
+        except pymysql.Error as e:
             conn.rollback()
             raise
         finally:
