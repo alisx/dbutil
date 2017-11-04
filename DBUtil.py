@@ -120,12 +120,15 @@ class DBConn(object):
             cursor = conn.cursor(pymysql.cursors.DictCursor)
             insert_sql += ','.join(insert_sqls)
             effect_count = cursor.executemany(insert_sql, values)
-            rows = self.qj('select * from %s where %s>=%d' % (
+            sql = 'select * from %s where %s>=%d' % (
                 table_name,
                 all_fields.get('primary_keys')[0],
                 cursor.lastrowid-effect_count+1,
-            ))
+            )
             conn.commit()
+            rows = self.qj(sql)
+            if type(rows) == tuple:
+                rows = list(rows)
         except pymysql.Error as e:
             conn.rollback()
             raise
@@ -172,7 +175,7 @@ class DBConn(object):
 
             update_rows.extend(insert_rows)
             conn.commit()
-        except pymysql.Error e:
+        except pymysql.Error as e:
             conn.rollback()
             raise
         finally:
