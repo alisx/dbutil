@@ -96,9 +96,11 @@ class DBConn(object):
         pass
 
     def insert(self, table_name, rows, conn=None):
+        # is_innser 表示是否属于处理内部，比如update可能会调用insert，此时insert是内部的
+        is_inner = False if conn is None else True
         # 获取表的字段
         all_fields = self.__get_table_fields(table_name)
-        insert_sqls = []
+        # insert_sqls = []
         insert_fields = all_fields.get('fields')
         insert_sql = "insert into %s (%s) " % (table_name, '`'+'`,`'.join(insert_fields)+'`')
         insert_sql += "values(" + ','.join(['%s'] * len(insert_fields)) + ")"
@@ -113,27 +115,38 @@ class DBConn(object):
                 else:
                     insert_values.append(None)
             values.append(insert_values)
+        if len(values) == 0:
+            return rows
+
         if conn is None:
             conn = self.__get_conn()
 
         try:
             cursor = conn.cursor(pymysql.cursors.DictCursor)
-            insert_sql += ','.join(insert_sqls)
-            effect_count = cursor.executemany(insert_sql, values)
+            effect_count = 0
+
+            if len(values) > 1:
+                effect_count = cursor.executemany(insert_sql, values[:-1])
+            print(values)
+            _effect_count = cursor.execute(insert_sql, values[-1])
+            effect_count += _effect_count
             sql = 'select * from %s where %s>=%d' % (
                 table_name,
                 all_fields.get('primary_keys')[0],
-                cursor.lastrowid-effect_count+1,
+                cursor.lastrowid-effect_count,
             )
-            conn.commit()
+            if not is_inner:
+                conn.commit()
             rows = self.qj(sql)
             if type(rows) == tuple:
                 rows = list(rows)
         except pymysql.Error as e:
-            conn.rollback()
-            raise
+            if not is_inner:
+                conn.rollback()
+            raise e
         finally:
-            conn.close()
+            if not is_inner:
+                conn.close()
         return rows
         pass
 
