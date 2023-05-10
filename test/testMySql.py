@@ -1,14 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-  执行测试前需要确认的事情：
-  1 确定mysql服务器是否ready
-  2 创建数据库test
-  3 创建库表 table_student
-    确保为唯一主键，且为自增长
-  4 Good luck!
-"""
 
-''' 表定义
+import init
+from DBMySql import DBMySql
+
+TableSql = '''
 CREATE TABLE `table_student` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -18,12 +13,11 @@ CREATE TABLE `table_student` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 '''
+# 换成自己的mysql服务器连接信息
+conn = DBMySql(host='127.0.0.1', user='user',
+               passwd='password', database='test')
+conn.de(TableSql)
 
-# 换成自己的mysql服务器信息
-import init
-from DBMySql import DBConn
-conn = DBConn(host='127.0.0.1', user='user',
-              passwd='password', database='test')
 print('链接创建成功')
 print('测试qj:', conn.qj("select * from table_student"))
 print('qvs:', conn.qvs("select name from table_student"))
