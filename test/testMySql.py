@@ -20,6 +20,7 @@ CREATE TABLE `table_student` (
 '''
 
 # 换成自己的mysql服务器信息
+import init
 from DBMySql import DBConn
 conn = DBConn(host='127.0.0.1', user='user',
               passwd='password', database='test')
@@ -35,10 +36,10 @@ insert_rows = conn.insert('table_student', [{'name': 'xiaoming', 'age': 12},
 print('insert: insert count:%d; ids:%s' % (len(insert_rows),
       ','.join([str(row.get('id')) for row in insert_rows])))
 
-update_rows = conn.update('t_jobs', [{'id': 1, 'gender': 'male', 'class': '1'},
-                                     {'id': 2, 'class': '2'},
-                                     {'name': 'cici', 'gender': 'female'}
-                                     ])
+update_rows = conn.update('table_student', [{'id': 1, 'gender': 'male', 'class': '1'},
+                                            {'id': 2, 'class': '2'},
+                                            {'name': 'cici', 'gender': 'female'}
+                                            ])
 print('update: update count:%d; ids:%s' % (len(update_rows),
       ','.join([str(row.get('id')) for row in update_rows])))
 
