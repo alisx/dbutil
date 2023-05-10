@@ -31,11 +31,11 @@ class DBConn(object):
             self.__config.update(config)
 
         self.poolcount = self.__config.get('poolcount', 10)
-        self.pool = Queue(poolcount)
+        self.pool = Queue(self.poolcount)
         self.__close = False
         self.readycount = 0
         self.inusecount = 0
-        for _ in range(poolcount):
+        for _ in range(self.poolcount):
             self.pool.put(self.__create_conn())
             self.readycount += 1
 
