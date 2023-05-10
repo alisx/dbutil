@@ -63,9 +63,9 @@ print('ret:',ret)
 
 ### 方法
 
-- **`DBConn`** 创建一个数据库工具实例
+- **`实例化`** 创建一个数据库工具实例
   
-   `DBMySQL`:
+   **`DBMySQL`**:
 
   *必选参数*：
   - `host`
@@ -78,7 +78,7 @@ print('ret:',ret)
   - `use_unicode` 默认`True`
   - `poolcount` 链接池中链接数量
   
-  `DBSqlite`:
+  **`DBSqlite`**:
 
   *必选参数*：
   - `db`：数据库文件路径
