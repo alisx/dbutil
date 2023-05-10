@@ -36,7 +36,7 @@ print('ret:',ret)
 
 是在 DBMySql 的基础上，改造的基于 Sqlite3 的数据操控工具，目前不支持连接池
 
-另外一些接口与 DBMySql 有些差别，比如 insert 方法目前支持使用元组类型，使用时请注意。
+除了创建连接对象接口，其他接口均和 DBMySql 一致。
 
 例子：
 
@@ -46,25 +46,27 @@ import DBSqlite
 
 db = DBSqlite('mydb.db')
 
-db.insert('table_student', [(None, 'xiaoming', '12', 'male')])
-
-print(db.qj('select * from table_student', True))
+rows = [{'name': 'xiaoming', 'age': '12', 'gender': 'male'},
+        {'name': 'xiaohong', 'age': '11', 'gender': 'female'}]
+ret = db.insert('table_student', rows)
+print('ret:',ret)
 
 # print
-# ret:[{'id': 1, 'name': 'xiaoming', 'age': '12', 'gender': 'male', 'class': None}]
-
+# ret:[{'id': 1, 'name': 'xiaoming', 'age': '12', 'gender': 'male', 'class': None}, {'id': 2, 'name': 'xiaohong', 'age': '11', 'gender': 'female', 'class': None}]
 ```
 
 ### 依赖
 
 - python3.6+
 - pymysql: `pip install pymysql`
-- sqlite3: `pip install sqlite3`
+- sqlite3: `pip install pysqlite3`
 
 ### 方法
 
 - **`DBConn`** 创建一个数据库工具实例
   
+   `DBMySQL`:
+
   *必选参数*：
   - `host`
   - `user`
@@ -75,6 +77,11 @@ print(db.qj('select * from table_student', True))
   - `charset` 默认 `utf8`
   - `use_unicode` 默认`True`
   - `poolcount` 链接池中链接数量
+  
+  `DBSqlite`:
+
+  *必选参数*：
+  - `db`：数据库文件路径
 
   *返回*：数据库连接对象
   
@@ -141,7 +148,7 @@ print(db.qj('select * from table_student', True))
 
 ### 许可
 
-本项目采用 **Mozilla 许可证**，大体含义是：
+本项目采用 **MPL 2**，大体含义是：
 
 1. 他人修改后不能闭源
 2. 新增代码可以不采用本许可证
