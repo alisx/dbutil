@@ -253,7 +253,7 @@ class DBMySql(object):
                             continue
                         val = row.get(f, None)
                         if val is not None:  # 有值
-                            placeholder = "{}=".format(f) + "%({})s".format(f)
+                            placeholder = "{}=".format(f) + "'%({})s'".format(f)
                             key_list.extend([placeholder])
                     if len(key_list) > 0:
                         val_list = ",".join(key_list)
