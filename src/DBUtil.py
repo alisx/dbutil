@@ -6,12 +6,12 @@
     支持链接池
     支持日志
 """
-from math import log
 import pymysql
 import logging
 from queue import Queue
 
 logger = logging.getLogger(__name__)
+
 
 class DBConn(object):
     _config = {
@@ -19,6 +19,7 @@ class DBConn(object):
         'use_unicode': True,
         'port': 3306
     }
+
     def __del__(self):
         while not self.pool.empty():
             self.pool.get().close()
@@ -37,10 +38,10 @@ class DBConn(object):
         for _ in range(poolcount):
             self.pool.put(self.__create_conn())
             self.readycount += 1
-        
 
     def __create_conn(self):
-        conn = pymysql.connect(cursorclass=pymysql.cursors.DictCursor, **self.__config)
+        conn = pymysql.connect(
+            cursorclass=pymysql.cursors.DictCursor, **self.__config)
         return conn
 
     def __get_conn(self):
@@ -52,7 +53,7 @@ class DBConn(object):
                 raise Exception("模块已关闭，无法获取链接")
             if self.pool.empty():
                 logger.warning("链接池没有空余链接，将创建。")
-                conn = self.__create_conn() # 有可能超拿
+                conn = self.__create_conn()  # 有可能超拿
             else:
                 conn = self.pool.get()
             if not conn.open:
@@ -67,16 +68,16 @@ class DBConn(object):
     def __back_conn(self, conn):
         if self.inusecount + self.readycount != self.poolcount:
             logger.warning("链接数量不等于链接池容量！")
-            
+
         if conn.open:
             if self.pool.full():
                 logger.warning("链接池已满，将释放。")
-                conn.close() # 放弃掉
+                conn.close()  # 放弃掉
             else:
                 self.pool.put(conn)
-        else: # 补充
+        else:  # 补充
             logger.warning("要还回的链接已关闭，将丢弃")
-        
+
         self.inusecount -= 1
         self.readycount = self.pool.qsize()
 
@@ -129,6 +130,7 @@ class DBConn(object):
             self.__back_conn(conn)
         return ret
         pass
+
     def get_table_fields(self, *args, **kargs):
         return self.__get_table_fields(*args, **kargs)
 
@@ -160,10 +162,12 @@ class DBConn(object):
             conn = self.__get_conn()
         # 获取表的字段
         all_fields = self.__get_table_fields(table_name, conn)
-        logger.debug(f"DBUtil insert after gettable fields  pool size:{self.pool.size()}")
+        logger.debug(
+            f"DBUtil insert after gettable fields  pool size:{self.pool.size()}")
         # insert_sqls = []
         insert_fields = all_fields.get('fields')
-        insert_sql = "insert into %s (%s) " % (table_name, '`'+'`,`'.join(insert_fields)+'`')
+        insert_sql = "insert into %s (%s) " % (
+            table_name, '`'+'`,`'.join(insert_fields)+'`')
         insert_sql += "values(" + ','.join(['%s'] * len(insert_fields)) + ")"
 
         values = []
@@ -178,15 +182,18 @@ class DBConn(object):
             values.append(insert_values)
         if len(values) == 0:
             return rows
-        logger.debug(f"DBUtil insert after mark rows  pool size:{self.pool.size()}")
+        logger.debug(
+            f"DBUtil insert after mark rows  pool size:{self.pool.size()}")
         try:
             effect_count = 0
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 if len(values) > 1:
                     effect_count = cursor.executemany(insert_sql, values[:-1])
-                    logger.debug(f"DBUtil insert after cursor.executemany  pool size:{self.pool.size()}")
+                    logger.debug(
+                        f"DBUtil insert after cursor.executemany  pool size:{self.pool.size()}")
                 _effect_count = cursor.execute(insert_sql, values[-1])
-                logger.debug(f"DBUtil insert after cursor.execute  pool size:{self.pool.size()}")
+                logger.debug(
+                    f"DBUtil insert after cursor.execute  pool size:{self.pool.size()}")
                 effect_count += _effect_count
                 sql = 'select * from %(tb)s where %(pk)s>%(bid)d and %(pk)s<%(eid)d' % {
                     'tb': table_name,
@@ -196,9 +203,11 @@ class DBConn(object):
                 }
             if is_inner:
                 conn.commit()
-                logger.debug(f"DBUtil insert after conn.commit()  pool size:{self.pool.size()}")
+                logger.debug(
+                    f"DBUtil insert after conn.commit()  pool size:{self.pool.size()}")
             rows = self.qj(sql, conn)
-            logger.debug(f"DBUtil insert after self.qj(sql, conn)  pool size:{self.pool.size()}")
+            logger.debug(
+                f"DBUtil insert after self.qj(sql, conn)  pool size:{self.pool.size()}")
             if type(rows) == tuple:
                 rows = list(rows)
         except pymysql.Error as e:
@@ -215,6 +224,7 @@ class DBConn(object):
     """
     有主键就更新，无主键则新增
     """
+
     def update(self, table_name, rows, conn=None):
         is_inner = True if conn is None else False
         if is_inner:
@@ -234,7 +244,7 @@ class DBConn(object):
                     # insert
                     insert_rows.append(row)
         try:
-            
+
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 for row in update_rows:
                     key_list = []
@@ -263,20 +273,21 @@ class DBConn(object):
         finally:
             if is_inner:
                 self.__back_conn(conn)
-            
+
         return update_rows
         pass
-    
+
+
 if __name__ == '__main__':
     sets = {
         'host': '127.0.0.1',
         'user': 'user',
-        'passwd' : 'passwd',
-        'database' : 'db'
+        'passwd': 'passwd',
+        'database': 'db'
     }
     tconn = DBConn(
-        host = sets['host'], user = sets['user'], passwd = sets['passwd'],
-        database = sets['database']
+        host=sets['host'], user=sets['user'], passwd=sets['passwd'],
+        database=sets['database']
     )
 
     print(tconn.qj("select sysdate()"))
