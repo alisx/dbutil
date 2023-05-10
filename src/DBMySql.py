@@ -13,7 +13,7 @@ from queue import Queue
 logger = logging.getLogger(__name__)
 
 
-class DBConn(object):
+class DBMySql(object):
     _config = {
         'charset': 'utf8',
         'use_unicode': True,
@@ -26,7 +26,7 @@ class DBConn(object):
         self.close = True
 
     def __init__(self, **config):
-        self.__config = DBConn._config.copy()
+        self.__config = DBMySql._config.copy()
         if config:
             self.__config.update(config)
 
@@ -285,7 +285,7 @@ if __name__ == '__main__':
         'passwd': 'passwd',
         'database': 'db'
     }
-    tconn = DBConn(
+    tconn = DBMySql(
         host=sets['host'], user=sets['user'], passwd=sets['passwd'],
         database=sets['database']
     )

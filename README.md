@@ -2,7 +2,9 @@
 
 ### 简介
 
-基于pymsql的mysql数据库类，且**支持链接池**;
+#### DBMySql
+
+是基于 pymsql的mysql数据库类，且**支持链接池**;
 
 pymsql模块很强大，但是操作Mysql数据库还是很繁琐，比如insert时需要拼接插入语句的
 于是依据以往使用习惯，编写了DBUtil类，目前只支持mysql，未来会扩展其他数据库
@@ -14,13 +16,13 @@ pymsql模块很强大，但是操作Mysql数据库还是很繁琐，比如insert
 例子：
 
 ```python
-import DBUtil
+import DBMysql
 
-conn = DBUtil.DBConn(poolcount=10, host='127.0.0.1', user='user', passwd='password', database='test')
+db = DBMysql.DBConn(poolcount=10, host='127.0.0.1', user='user', passwd='password', database='test')
 
 rows = [{'name': 'xiaoming', 'age': '12', 'gender': 'male'},
         {'name': 'xiaohong', 'age': '11', 'gender': 'female'}]
-ret = conn.insert('table_student', rows)
+ret = db.insert('table_student', rows)
 print('ret:',ret)
 
 # print
@@ -30,10 +32,34 @@ print('ret:',ret)
 > **注意**
 > 如果需要写库表，请确保该库表 **必须有且有唯一的自增长主键**
 
+#### DBSqlite
+
+是在 DBMySql 的基础上，改造的基于 Sqlite3 的数据操控工具，目前不支持连接池
+
+另外一些接口与 DBMySql 有些差别，比如 insert 方法目前支持使用元组类型，使用时请注意。
+
+例子：
+
+```python
+
+import DBSqlite
+
+db = DBSqlite('mydb.db')
+
+db.insert('table_student', [(None, 'xiaoming', '12', 'male')])
+
+print(db.qj('select * from table_student', True))
+
+# print
+# ret:[{'id': 1, 'name': 'xiaoming', 'age': '12', 'gender': 'male', 'class': None}]
+
+```
+
 ### 依赖
 
 - python3.6+
 - pymysql: `pip install pymysql`
+- sqlite3: `pip install sqlite3`
 
 ### 方法
 
