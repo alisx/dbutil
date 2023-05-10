@@ -7,7 +7,7 @@
     确保为唯一主键，且为自增长
   4 Good luck!
 """
-from ..DBUtil import DBConn
+from ..DBMySql import DBConn
 
 # 换成自己的mysql服务器信息
 conn = DBConn(host='127.0.0.1', user='user',
