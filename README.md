@@ -36,13 +36,13 @@ print('ret:',ret)
 
 是在 DBMySql 的基础上，改造的基于 Sqlite3 的数据操控工具，目前不支持连接池
 
-除了创建连接对象接口，其他接口均和 DBMySql 一致。
+除了创建实例化接口，其他接口均和 DBMySql 一致。
 
 例子：
 
 ```python
 
-import DBSqlite
+from DBSqlite import DBSqlite
 
 db = DBSqlite('mydb.db')
 
