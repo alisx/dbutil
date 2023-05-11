@@ -18,13 +18,13 @@ class DBSqlite:
         fields = [column[0] for column in cursor.description]
         return {key: value for key, value in zip(fields, row)}
 
-    def _get_conn(self):
+    def __get_conn(self):
         if not self._conn:
             self._conn = sqlite3.connect(self.db)
             self._conn.row_factory = self.__dict_factory
         return self._conn
 
-    def _close_conn(self):
+    def __close_conn(self):
         if self._conn:
             self._conn.close()
             self._conn = None
@@ -32,25 +32,25 @@ class DBSqlite:
     def _query(self, sql, conn=None):
         is_inner = True if conn is None else False
         if is_inner:
-            conn = self._get_conn()
+            conn = self.__get_conn()
         # cur = conn.cursor()
         rows = []
         for row in conn.execute(sql):
             rows.append(row)
         if is_inner:
-            self._close_conn()
+            self.__close_conn()
         return rows
 
     def _get_table_fields(self, table_name, conn=None):
         is_inner = True if conn is None else False
         if is_inner:
-            conn = self._get_conn()
+            conn = self.__get_conn()
         cur = conn.execute(f"PRAGMA table_info('{table_name}')")
         rows = cur.fetchall()
         # print(rows)
         # conn.close()
         if is_inner:
-            self._close_conn()
+            self.__close_conn()
         field_names = []
         primary_keys = []
         for r in rows:
@@ -68,20 +68,20 @@ class DBSqlite:
     def de(self, sql, conn=None):
         is_inner = True if conn is None else False
         if is_inner:
-            conn = self._get_conn()
+            conn = self.__get_conn()
         # cur = conn.cursor()
         for s in sql.split(";"):
             conn.execute(s)
         conn.commit()
         # cur.close()
         if is_inner:
-            self._close_conn()
+            self.__close_conn()
         return True
 
     def insert(self, table_name, rows, conn=None):
         is_inner = True if conn is None else False
         if is_inner:
-            conn = self._get_conn()
+            conn = self.__get_conn()
         # print('insert:', is_inner)
 
         all_fields = self._get_table_fields(table_name, conn)
@@ -106,7 +106,7 @@ class DBSqlite:
             return rows
         try:
             effect_count = 0
-            conn = self._get_conn()
+            conn = self.__get_conn()
             # cursor = conn.cursor()
             if len(values) > 1:
                 cur = conn.executemany(insert_sql, values[:-1])
@@ -132,13 +132,13 @@ class DBSqlite:
             raise e
         finally:
             if is_inner:
-                self._close_conn()
+                self.__close_conn()
         return rows
 
     def update(self, table_name, rows, conn=None):
         is_inner = True if conn is None else False
         if is_inner:
-            conn = self._get_conn()
+            conn = self.__get_conn()
         # print('update:', is_inner)
         all_fields = self._get_table_fields(table_name, conn)
 
@@ -184,7 +184,7 @@ class DBSqlite:
             raise e
         finally:
             if is_inner:
-                self._close_conn()
+                self.__close_conn()
             pass
 
         return update_rows
@@ -199,7 +199,7 @@ class DBSqlite:
         rows = cur.fetchall()
         # cur.close()
         if is_inner:
-            self._close_conn()
+            self.__close_conn()
         return rows
         pass
 
@@ -212,7 +212,7 @@ class DBSqlite:
         rows = cur.fetchall()
         # cur.close()
         if is_inner:
-            self._close_conn()
+            self.__close_conn()
 
         if len(rows) > 0:
             return rows[0][0]
