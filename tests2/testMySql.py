@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import init
-from DBMySql import DBMySql
+from pydbconn.DBMySql import DBMySql
 
 TableSql = '''
 CREATE TABLE `table_student` (
