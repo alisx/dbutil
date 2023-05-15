@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import init
-from pydbconn.sqlite import DBSqlite
+from pydbconn.Sqlite import DBSqlite
 
 TableSQL = '''
 CREATE TABLE IF NOT EXISTS "table_student" (
